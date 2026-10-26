@@ -73,4 +73,4 @@ copy/symlink the included extension:
 
 Or
 
-    ln -s $(realpath harnesses/pi/litellm.ts) $(~/.pi/agent/extensions)
+    ln -s $(realpath harnesses/pi/litellm.ts) ~/.pi/agent/extensions/
