@@ -6,35 +6,31 @@
 >('>   \\/  o\ .
        //\___=
           ''
-Minimal docker container that acts as a microsandbox --- a
-tiny fish in a tiny can if you will, kind of like sardines
---- specifically tailored towards keeping agents out of
-unwanted credential usage while being flexible and
-extensible to the point of being dangerous if you want to.
-Who am I to say you can't shoot yourself in the foot? I'm
-not your mother.
+Minimal docker container that acts as a sandbox --- tiny
+sardines in a tiny can if you will --- tailored at keeping
+agents out of unwanted credential usage while being flexible
+and extensible to the point of being dangerous if you want
+to. Who am I to say you can't shoot yourself in the foot?
+I'm not your mother.
 
 It works in a LiteLLM setup, where the API key is injected
-by an isolated Caddy gateway container.
+by an isolated Caddy gateway container. The sandbox image
+has a persistent folder for things like installing
+harnesses, caches etc. Just think of it as a small Linux
+installation that you can use as you normally would.
 
-The sandbox image has a persistent folder for things like
-installing harnesses, npm versions, and pip caches etc. Just
-think of it as a super small Linux installation that you can
-use as normal.
+o-----------------o
+|   QUICK START   |
+o-----------------o
 
-=== QUICK START ===
-
-Set environment variables on host machine (or preferably
-resolve using keychain rather than setting them in bashrc)
+Set environment variables on host machine:
 
     SANDBOX_PROJECT_FOLDER
-        denotes the working directory, where the sandbox is
-        started. Preferably set this to the folder
-        containing coding projects.
+        The working directory the sandbox uses.
     GATEWAY_URL
-        denotes the LiteLLM endpoint URL
+        The LiteLLM endpoint URL.
     GATEWAY_KEY
-        denotes the LiteLLM API key
+        The LiteLLM API key.
 
 Build and start the containers:
 
@@ -44,33 +40,29 @@ Then enter the sandbox using docker exec:
 
     docker exec -it sardine bash
 
-Install whatever harness you want inside the sandbox as you
-normally would. This will persist after reboots etc. See
-harnesses config below.
+Install whatever tools you want inside the sandbox as you
+normally would. This will persist after reboots etc. To make
+it a bit less cumbersome and easier to use, you can create
+aliases to get you directly into a harness or tool:
 
-To make it a bit less cumbersome and easier to use, you can
-create aliases to get you directly into a harness or tool:
-
+    alias sardine="docker exec -it sardine bash"
     alias pi="docker exec -it sardine pi"
 
-=== BUILDING ===
+                                          ;,//;,    ,;/
+                                         o:::::::;;///
+                                        >::::::::;;\\\
+                                          ''\\\\\'" ';\
+o----------------o
+|   PI HARNESS   |
+o----------------o
 
-docker compose -f compose.yaml -f compose.dev.yaml up -d --build
-
-+===========+
-| HARNESSES |
-+===========+
-
-=== PI ===
-
-Install pi as normal from https://pi.dev/ inside the sandbox.
-
-To enable dynamic model discovery and LiteLLM MCP registration,
-copy/symlink the included extension:
+Install pi from https://pi.dev/ inside the sandbox. To
+enable dynamic model discovery and LiteLLM MCP registration:
 
     mkdir -p ~/.pi/agent/extensions
     cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
 
-Or
+or
 
+    mkdir -p ~/.pi/agent/extensions
     ln -s $(realpath harnesses/pi/litellm.ts) ~/.pi/agent/extensions/
