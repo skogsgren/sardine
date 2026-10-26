@@ -21,6 +21,7 @@ RUN apt-get update \
         python3-pandas \
         python3-matplotlib \
         python3-requests \
+        sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 # python tooling
