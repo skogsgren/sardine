@@ -34,7 +34,7 @@ services:
       - no-new-privileges:true
     pids_limit: 512
     tmpfs:
-      - /tmp:size=512m,mode=1777
+      - /tmp:size=2G,mode=1777
 
   gateway:
     image: caddy:2-alpine
