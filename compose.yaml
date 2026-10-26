@@ -9,12 +9,11 @@ name: sardine
 
 services:
   sandbox:
-    # Never add `environment:` or `env_file:` here. GATEWAY_KEY must stay out of
-    # this container; the image already carries the placeholder harnesses use.
     image: ${SANDBOX_IMAGE:-sardine:latest}
     container_name: sardine
     init: true
     restart: unless-stopped
+    network_mode: "service:gateway"
     command: sleep infinity
     depends_on:
       - gateway
@@ -38,11 +37,11 @@ services:
       - /tmp:size=512m,mode=1777
 
   gateway:
-    image: ${SANDBOX_IMAGE:-sardine:latest}
+    image: caddy:2-alpine
     container_name: sardine-gateway
     restart: unless-stopped
-    command:
-      - /usr/local/bin/gateway-entrypoint
+    volumes:
+      - ./gateway.Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
       GATEWAY_KEY: ${GATEWAY_KEY:?export GATEWAY_KEY or put it in .env}
       GATEWAY_URL: ${GATEWAY_URL:?export GATEWAY_URL or put it in .env}

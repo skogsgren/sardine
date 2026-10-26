@@ -40,22 +40,11 @@ ENV FNM_DIR=/home/node/.local/share/fnm \
     UV_TOOL_BIN_DIR=/home/node/.local/bin \
     PATH=$PATH:/home/node/.local/bin:/home/node/.opencode/bin:/home/node/.cargo/bin
 
-ENV GATEWAY_KEY=placeholder-not-a-key \
-    LITELLM_API_KEY=placeholder-not-a-key \
-    LITELLM_DISCOVERY_TIMEOUT_MS=15000
+ENV LITELLM_API_KEY=placeholder-not-a-key
 
 RUN printf '%s\n' \
       'eval "$(fnm env --use-on-cd --shell bash)"' \
       'PS1="(sandbox) \w \$ "' \
       >> /etc/bash.bashrc
-
-# One image serves both services: the gateway copies Caddy in and templates the
-# upstream from GATEWAY_URL at container start.
-COPY --from=caddy:2-alpine /usr/bin/caddy /usr/local/bin/caddy
-COPY gateway.Caddyfile /etc/caddy/Caddyfile.tmpl
-COPY gateway-entrypoint.sh /usr/local/bin/gateway-entrypoint
-RUN install -d -m 0755 /etc/caddy \
-    && chmod 0644 /etc/caddy/Caddyfile.tmpl \
-    && chmod 0755 /usr/local/bin/gateway-entrypoint
 
 USER node

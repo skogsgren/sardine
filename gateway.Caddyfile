@@ -1,10 +1,37 @@
 :8080 {
 	log
 
-	reverse_proxy __UPSTREAM__ {
-		header_up Host __HOST__
-		header_up Authorization "Bearer {env.GATEWAY_KEY}"
-		header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
-		flush_interval -1
+	# Chat completions, embeddings, models
+	handle /litellm/v1/* {
+		reverse_proxy {$GATEWAY_URL} {
+			header_up Host {upstream_hostport}
+			header_up Authorization "Bearer {env.GATEWAY_KEY}"
+			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
+			flush_interval -1
+		}
+	}
+
+	# Dynamic model discovery
+	handle /litellm/model_group/info {
+		reverse_proxy {$GATEWAY_URL} {
+			header_up Host {upstream_hostport}
+			header_up Authorization "Bearer {env.GATEWAY_KEY}"
+			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
+		}
+	}
+
+	# MCP server
+	handle /litellm/mcp* {
+		reverse_proxy {$GATEWAY_URL} {
+			header_up Host {upstream_hostport}
+			header_up Authorization "Bearer {env.GATEWAY_KEY}"
+			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
+			flush_interval -1
+		}
+	}
+
+	# Block all other paths (key admin, user info, team management, etc.)
+	handle {
+		respond "Access Denied" 403
 	}
 }
