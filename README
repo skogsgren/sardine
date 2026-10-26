@@ -14,14 +14,13 @@ extensible to the point of being dangerous if you want to.
 Who am I to say you can't shoot yourself in the foot? I'm
 not your mother.
 
-It is hardcoded to work in a LiteLLM setup, where the API
-key is served through a proxy inside the sandbox. This part
-is currently not flexible at all.
+It works in a LiteLLM setup, where the API key is injected
+by an isolated Caddy gateway container.
 
-The image has a persistent folder for things like installing
-harnesses, npm versions, and pip caches etc. Just think of
-it as a super small Linux installation that you can use as
-normal.
+The sandbox image has a persistent folder for things like
+installing harnesses, npm versions, and pip caches etc. Just
+think of it as a super small Linux installation that you can
+use as normal.
 
 === QUICK START ===
 
@@ -37,8 +36,7 @@ resolve using keychain rather than setting them in bashrc)
     GATEWAY_KEY
         denotes the LiteLLM API key
 
-Go into docker compose and configure as seen fit. Since this
-is not published on Docker hub yet, you have to build it:
+Build and start the containers:
 
     docker compose -f compose.yaml -f compose.dev.yaml up -d --build
 
@@ -65,27 +63,14 @@ docker compose -f compose.yaml -f compose.dev.yaml up -d --build
 
 === PI ===
 
-Install pi as normal from https://pi.dev/ inside the sandbox
+Install pi as normal from https://pi.dev/ inside the sandbox.
 
-If you have a pre-existing pi setup it should work as normal
-after that, using the already existing local config.
+To enable dynamic model discovery and LiteLLM MCP registration,
+copy/symlink the included extension:
 
-To use it with LiteLLM, first install the extension:
+    mkdir -p ~/.pi/agent/extensions
+    cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
 
-    pi install npm:pi-provider-litellm
+Or
 
-Then make sure ~/.pi/agent/models.json looks something like this:
-
-{
-  "providers": {},
-  "litellm": {
-    "providers": {
-      "litellm": {
-        "baseUrl": "http://gateway:8080/litellm",
-        "apiKey": "$LITELLM_API_KEY",
-        "allowInsecureHttp": true,
-        "enableMcp": true
-      }
-    }
-  }
-}
+    ln -s $(realpath harnesses/pi/litellm.ts) $(~/.pi/agent/extensions)
