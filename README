@@ -1,0 +1,91 @@
+              o---------o
+              | SARDINE |
+              o---------o
+               O  o
+          _\_   o
+>('>   \\/  o\ .
+       //\___=
+          ''
+Minimal docker container that acts as a microsandbox --- a
+tiny fish in a tiny can if you will, kind of like sardines
+--- specifically tailored towards keeping agents out of
+unwanted credential usage while being flexible and
+extensible to the point of being dangerous if you want to.
+Who am I to say you can't shoot yourself in the foot? I'm
+not your mother.
+
+It is hardcoded to work in a LiteLLM setup, where the API
+key is served through a proxy inside the sandbox. This part
+is currently not flexible at all.
+
+The image has a persistent folder for things like installing
+harnesses, npm versions, and pip caches etc. Just think of
+it as a super small Linux installation that you can use as
+normal.
+
+=== QUICK START ===
+
+Set environment variables on host machine (or preferably
+resolve using keychain rather than setting them in bashrc)
+
+    SANDBOX_PROJECT_FOLDER
+        denotes the working directory, where the sandbox is
+        started. Preferably set this to the folder
+        containing coding projects.
+    GATEWAY_URL
+        denotes the LiteLLM endpoint URL
+    GATEWAY_KEY
+        denotes the LiteLLM API key
+
+Go into docker compose and configure as seen fit. Since this
+is not published on Docker hub yet, you have to build it:
+
+    docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+
+Then enter the sandbox using docker exec:
+
+    docker exec -it sardine bash
+
+Install whatever harness you want inside the sandbox as you
+normally would. This will persist after reboots etc. See
+harnesses config below.
+
+To make it a bit less cumbersome and easier to use, you can
+create aliases to get you directly into a harness or tool:
+
+    alias pi="docker exec -it sardine pi"
+
+=== BUILDING ===
+
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+
++===========+
+| HARNESSES |
++===========+
+
+=== PI ===
+
+Install pi as normal from https://pi.dev/ inside the sandbox
+
+If you have a pre-existing pi setup it should work as normal
+after that, using the already existing local config.
+
+To use it with LiteLLM, first install the extension:
+
+    pi install npm:pi-provider-litellm
+
+Then make sure ~/.pi/agent/models.json looks something like this:
+
+{
+  "providers": {},
+  "litellm": {
+    "providers": {
+      "litellm": {
+        "baseUrl": "http://gateway:8080/litellm",
+        "apiKey": "$LITELLM_API_KEY",
+        "allowInsecureHttp": true,
+        "enableMcp": true
+      }
+    }
+  }
+}

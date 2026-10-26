@@ -1,0 +1,51 @@
+# configure through the environment or a .env file next to this one:
+#   SANDBOX_PROJECT_FOLDER  absolute path of the folder the agent may see
+#   GATEWAY_KEY             privileged key, read by the gateway service only
+#   GATEWAY_URL             gateway origin, scheme and host, no path
+#   SANDBOX_IMAGE           image reference (defaults to the local build tag)
+x-project: &project ${SANDBOX_PROJECT_FOLDER:?set SANDBOX_PROJECT_FOLDER to the folder the agent may see}
+
+name: sardine
+
+services:
+  sandbox:
+    # Never add `environment:` or `env_file:` here. GATEWAY_KEY must stay out of
+    # this container; the image already carries the placeholder harnesses use.
+    image: ${SANDBOX_IMAGE:-sardine:latest}
+    container_name: sardine
+    init: true
+    restart: unless-stopped
+    command: sleep infinity
+    depends_on:
+      - gateway
+    working_dir: *project
+    volumes:
+      - type: bind
+        source: *project
+        target: *project
+      - type: bind
+        source: ${HOME}/.pi
+        target: /home/node/.pi
+        bind:
+          create_host_path: false
+      - sandbox-home:/home/node
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+
+  gateway:
+    image: ${SANDBOX_IMAGE:-sardine:latest}
+    container_name: sardine-gateway
+    restart: unless-stopped
+    command:
+      - /usr/local/bin/gateway-entrypoint
+    environment:
+      GATEWAY_KEY: ${GATEWAY_KEY:?export GATEWAY_KEY or put it in .env}
+      GATEWAY_URL: ${GATEWAY_URL:?export GATEWAY_URL or put it in .env}
+
+volumes:
+  sandbox-home:

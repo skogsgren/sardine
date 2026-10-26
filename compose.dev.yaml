@@ -1,0 +1,4 @@
+# local dev: adds a build step on top of compose.yaml
+services:
+  sandbox:
+    build: .
