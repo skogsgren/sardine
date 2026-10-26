@@ -19,6 +19,13 @@ has a persistent folder for things like installing
 harnesses, caches etc. Just think of it as a small Linux
 installation that you can use as you normally would.
 
+While intentionally minimal, some things are included:
+
+    - python3 (w. numpy, pandas, matplotlib)
+    - python3 tooling (uv, poetry, ruff)
+    - node, fnm
+    - git, jq, ripgrep, wget, sqlite3
+
 o-----------------o
 |   QUICK START   |
 o-----------------o
@@ -66,3 +73,8 @@ or
 
     mkdir -p ~/.pi/agent/extensions
     ln -s $(realpath harnesses/pi/litellm.ts) ~/.pi/agent/extensions/
+
+If you ran pi previously outside the sandbox the ~/.pi
+config will be picked up automatically. Otherwise this
+folder will be created after running pi the first time, both
+outside and inside the sandbox.
