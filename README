@@ -77,11 +77,6 @@ discovery and LiteLLM MCP registration:
     mkdir -p ~/.pi/agent/extensions
     cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
 
-If you ran pi previously outside the sandbox the ~/.pi
-config will be picked up automatically. Otherwise this
-folder will be created after running pi the first time, both
-outside and inside the sandbox.
-
 o------------------o
 | OPENCODE HARNESS |
 o------------------o
@@ -92,8 +87,7 @@ discovery and LiteLLM MCP registration:
     mkdir -p ~/.config/opencode
     sh harnesses/opencode/litellm.sh
 
-To refresh on every launch, do it inside the container; in
-an alias something like this:
+To refresh on every launch, define an alias like this:
 
     cp harnesses/opencode/litellm.sh ~/.config/opencode/litellm.sh
     alias opencode='docker exec -it sardine sh -c "sh ~/.config/opencode/litellm.sh >/dev/null; exec opencode"'
