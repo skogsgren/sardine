@@ -54,7 +54,7 @@ ENV LITELLM_API_KEY=placeholder-not-a-key
 
 RUN printf '%s\n' \
       'eval "$(fnm env --use-on-cd --shell bash)"' \
-      'PS1="(sandbox) \w \$ "' \
+      'export PROMPT_COMMAND="PS1='\''\\$ '\''"' \
       >> /etc/bash.bashrc
 
 USER node
