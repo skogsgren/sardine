@@ -22,7 +22,6 @@ RUN apt-get update \
         python3-numpy \
         python3-pandas \
         python3-pydantic \
-        python3-pyenv \
         python3-pytest \
         python3-matplotlib \
         python3-build \
