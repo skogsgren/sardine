@@ -4,12 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 # python3-.* is here for common packages without requiring venv
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        build-essential \
+        make \
+        file \
         ca-certificates \
         curl \
         git \
         jq \
         less \
-        procps \
         ripgrep \
         unzip \
         wget \
@@ -19,14 +21,17 @@ RUN apt-get update \
         python3-venv \
         python3-numpy \
         python3-pandas \
+        python3-pydantic \
+        python3-pytest \
         python3-matplotlib \
-        python3-requests \
+        python3-build \
+        python3-wheel \
         sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 # python tooling
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
-RUN UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install poetry
+RUN UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install poetry && uv tool install ruff
 
 # fnm: binary in the image, downloaded Node versions under $FNM_DIR in the volume.
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local/bin --skip-shell \
