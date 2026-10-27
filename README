@@ -69,11 +69,6 @@ enable dynamic model discovery and LiteLLM MCP registration:
     mkdir -p ~/.pi/agent/extensions
     cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
 
-or
-
-    mkdir -p ~/.pi/agent/extensions
-    ln -s $(realpath harnesses/pi/litellm.ts) ~/.pi/agent/extensions/
-
 If you ran pi previously outside the sandbox the ~/.pi
 config will be picked up automatically. Otherwise this
 folder will be created after running pi the first time, both
