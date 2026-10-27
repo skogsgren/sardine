@@ -25,10 +25,17 @@ While intentionally minimal, some things are included:
     - python3 tooling (uv, poetry, ruff)
     - node, fnm
     - git, jq, ripgrep, wget, sqlite3
+    - pi harness
 
 o-----------------o
 |   QUICK START   |
 o-----------------o
+
+If you're on Mac, install something like Colima to get
+the docker daemon:
+
+    brew install colima
+    colima start
 
 Set environment variables on host machine:
 
@@ -63,8 +70,8 @@ o----------------o
 |   PI HARNESS   |
 o----------------o
 
-Install pi from https://pi.dev/ inside the sandbox. To
-enable dynamic model discovery and LiteLLM MCP registration:
+pi is installed by default. To enable dynamic model
+discovery and LiteLLM MCP registration:
 
     mkdir -p ~/.pi/agent/extensions
     cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
