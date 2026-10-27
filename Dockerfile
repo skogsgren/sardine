@@ -22,6 +22,7 @@ RUN apt-get update \
         python3-numpy \
         python3-pandas \
         python3-pydantic \
+        python3-pyenv \
         python3-pytest \
         python3-matplotlib \
         python3-build \
@@ -40,6 +41,9 @@ RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/lo
 RUN mkdir -p /home/node/.local/bin /home/node/.cache \
     && echo 'sandbox home volume' > /home/node/.keep \
     && chown -R node:node /home/node
+
+# install pi as a small default harness
+RUN curl -fsSL https://pi.dev/install.sh | sh
 
 ENV FNM_DIR=/home/node/.local/share/fnm \
     NPM_CONFIG_PREFIX=/home/node/.local \
