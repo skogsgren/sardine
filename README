@@ -80,3 +80,27 @@ If you ran pi previously outside the sandbox the ~/.pi
 config will be picked up automatically. Otherwise this
 folder will be created after running pi the first time, both
 outside and inside the sandbox.
+
+                                          ;,//;,    ,;/
+                                         o:::::::;;///
+                                        >::::::::;;\\\
+                                          ''\\\\\'" ';\
+o------------------o
+| OPENCODE HARNESS |
+o------------------o
+
+opencode is not baked into the image, but the directories
+are symlinked between host and sandbox in the image. To use
+it, install OpenCode inside the sandbox as usual.
+
+opencode has no dynamic provider discovery, so the LiteLLM
+model catalog must be enumerated into its config. Generate
+it from the gateway:
+
+    sh harnesses/opencode/litellm.sh
+
+That appends to ~/.config/opencode/opencode.json with every
+model on the gateway, plus MCPs. Run it before opening
+opencode to automatically keep it up to date, e.g:
+
+    alias opencode="/path/to/litellm.sh && docker exec -it sardine opencode"

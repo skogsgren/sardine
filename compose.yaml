@@ -27,6 +27,11 @@ services:
         target: /home/node/.pi
         bind:
           create_host_path: false
+      - type: bind
+        source: ${HOME}/.config/opencode
+        target: /home/node/.config/opencode
+        bind:
+          create_host_path: false
       - sandbox-home:/home/node
     cap_drop:
       - ALL
