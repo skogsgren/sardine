@@ -16,7 +16,7 @@ not your mother.
 
 It works in a LiteLLM setup, where the API key is injected
 by an isolated Caddy gateway container. The sandbox image
-has a persistent folder for things like installing
+has a persistent docker volume for things like installing
 harnesses, caches etc. Just think of it as a small Linux
 installation that you can use as you normally would.
 
