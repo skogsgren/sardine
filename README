@@ -6,12 +6,13 @@
 >('>   \\/  o\ .
        //\___=
           ''
-Minimal docker container that acts as a sandbox --- tiny
-sardines in a tiny can if you will --- tailored at keeping
-agents out of unwanted credential usage while being flexible
-and extensible to the point of being dangerous if you want
-to. Who am I to say you can't shoot yourself in the foot?
-I'm not your mother.
+
+Minimal docker container harness setup --- tiny sardines in
+a tiny can if you will --- tailored at keeping agents out of
+unwanted credential usage while being flexible and
+extensible to the point of being dangerous if you want to.
+Who am I to say you can't shoot yourself in the foot?  I'm
+not your mother.
 
 It works in a LiteLLM setup, where the API key is injected
 by an isolated Caddy gateway container. The sandbox image
@@ -19,13 +20,13 @@ has a persistent folder for things like installing
 harnesses, caches etc. Just think of it as a small Linux
 installation that you can use as you normally would.
 
-While intentionally minimal, some things are included:
+While minimal, some things are included:
 
     - python3 (w. numpy, pandas, matplotlib)
     - python3 tooling (uv, poetry, ruff)
     - node, fnm
     - git, jq, ripgrep, wget, sqlite3
-    - pi harness
+    - pi, opencode
 
 o-----------------o
 |   QUICK START   |
@@ -81,26 +82,18 @@ config will be picked up automatically. Otherwise this
 folder will be created after running pi the first time, both
 outside and inside the sandbox.
 
-                                          ;,//;,    ,;/
-                                         o:::::::;;///
-                                        >::::::::;;\\\
-                                          ''\\\\\'" ';\
 o------------------o
 | OPENCODE HARNESS |
 o------------------o
 
-opencode is not baked into the image, but the directories
-are symlinked between host and sandbox in the image. To use
-it, install OpenCode inside the sandbox as usual.
+opencode is installed by default. To enable dynamic model
+discovery and LiteLLM MCP registration:
 
-opencode has no dynamic provider discovery, so the LiteLLM
-model catalog must be enumerated into its config. Generate
-it from the gateway:
-
+    mkdir -p ~/.config/opencode
     sh harnesses/opencode/litellm.sh
 
-That appends to ~/.config/opencode/opencode.json with every
-model on the gateway, plus MCPs. Run it before opening
-opencode to automatically keep it up to date, e.g:
+To refresh on every launch, do it inside the container; in
+an alias something like this:
 
-    alias opencode="/path/to/litellm.sh && docker exec -it sardine opencode"
+    cp harnesses/opencode/litellm.sh ~/.config/opencode/litellm.sh
+    alias opencode='docker exec -it sardine sh -c "sh ~/.config/opencode/litellm.sh >/dev/null; exec opencode"'

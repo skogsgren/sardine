@@ -41,8 +41,9 @@ RUN mkdir -p /home/node/.local/bin /home/node/.cache \
     && echo 'sandbox home volume' > /home/node/.keep \
     && chown -R node:node /home/node
 
-# install pi as a small default harness
+# install harnesses
 RUN curl -fsSL https://pi.dev/install.sh | sh
+RUN curl -fsSL https://opencode.ai/v2/install | bash
 
 ENV FNM_DIR=/home/node/.local/share/fnm \
     NPM_CONFIG_PREFIX=/home/node/.local \
