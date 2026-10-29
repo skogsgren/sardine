@@ -74,6 +74,37 @@ the host:
 
     export DOCKER_CLI_HINTS=false
 
+o--------------------o
+|  PR REVIEW SCRIPT  |
+o--------------------o
+
+./scripts/sardine-pr is an included script, which is run on
+the host machine to clone a PR including comments etc to aid
+in agent-supported PR reviews. To run it, run this from
+host:
+
+    ./scripts/sardine-pr <owner/repo> <pull-number>
+
+That clones the repo into a host cache, fetches
+refs/pull/<n>/head, and writes a self-contained review
+folder inside $SANDBOX_PROJECT_FOLDER:
+
+    reviews/<owner>__<repo>__pr-<n>/
+        README.md                  orientation for the agent
+        meta/pr.json               body, comments, reviews, files
+        meta/review-comments.json  inline review comments
+        meta/pr.diff               unified diff
+        repo/                      checkout of the PR head
+
+Requires python3 (standard library only) and the gh CLI,
+authenticated on the host:
+
+    gh auth login
+
+And to make it easier to use, symlink it:
+
+    ln -s $(realpath scripts/sardine-pr) ~/.local/bin
+
 o----------------o
 |   PI HARNESS   |
 o----------------o
@@ -98,3 +129,5 @@ To refresh on every launch, define an alias like this:
 
     cp harnesses/opencode/litellm.sh ~/.config/opencode/litellm.sh
     alias opencode='docker exec -it sardine sh -c "sh ~/.config/opencode/litellm.sh >/dev/null; exec opencode"'
+
+" vim: set autoindent tw=60 cc=60 formatoptions+=t:

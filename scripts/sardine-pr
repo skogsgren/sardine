@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Grab a GitHub pull request -> $SANDBOX_PROJECT_FOLDER/reviews
+scripts/sardine-pr <owner/repo> <pr-number>
+"""
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+PROG = "sardine-pr"
+PER_PAGE = 100
+FIELDS = (
+    "number,title,body,author,state,isDraft,url,"
+    "createdAt,baseRefName,headRefName,files,comments,reviews"
+)
+
+README = """# {repo} #{pr} - review workspace
+
+1. `meta/pr.json` - title, body, description, PR comments, reviews, file list.
+2. `meta/pr.diff` - the change set.
+3. `meta/review-comments.json` - inline line-anchored review comments.
+4. `repo/` - checkout at the PR head, for surrounding context.
+
+`repo/pr-{pr}` is the PR head, `repo/_base` is the base branch tip:
+
+    git -C repo diff "$(git -C repo merge-base _base pr-{pr})" pr-{pr}
+
+`origin` is deliberately absent, so `fetch` and `push` fail here by design.
+"""
+
+
+def sh(*argv: str) -> str:
+    proc = subprocess.run(
+        argv, check=False, capture_output=True, text=True, encoding="utf-8"
+    )
+    if proc.returncode:
+        sys.exit(f"{PROG}: {proc.stderr.strip() or ' '.join(argv) + ' failed'}")
+    return proc.stdout
+
+
+def git(*args: str, cwd: Path | None = None) -> str:
+    return sh("git", *(["-C", str(cwd)] if cwd else []), *args)
+
+
+def readme(view: dict, repo: str, pr: str, sha: str) -> str:
+    # f-string, not .format: a title containing braces must not break it
+    return f"""# {repo} #{pr} - {view["title"]}
+
+Head `{view["headRefName"]}` @ `{sha}` - base `{view["baseRefName"]}`
+
+Static snapshot written on the host by `scripts/sardine-pr`. No credential,
+no remote.
+
+1. `meta/pr.json` - the PR: title, body, comments, reviews, file list.
+2. `meta/pr.diff` - the change set.
+3. `meta/review-comments.json` - inline line-anchored review comments.
+4. `repo/` - checkout at the PR head, for surrounding context.
+
+The checkout is self-contained, with `pr-{pr}` as the PR head and `_base` as
+the base branch tip:
+
+    git -C repo log --oneline -5 pr-{pr}
+    git -C repo diff "$(git -C repo merge-base _base pr-{pr})" pr-{pr}
+
+`origin` is deliberately absent, so `fetch` and `push` fail here by design.
+Re-running the command updates this folder in place.
+"""
+
+
+def main() -> None:
+    if len(sys.argv) != 3 or sys.argv[1] in ("-h", "--help"):
+        sys.exit(f"usage: {PROG} <owner/repo> <pr-number>")
+    repo, pr = sys.argv[1], sys.argv[2]
+    if not re.fullmatch(r"[A-Za-z0-9._-]+/[A-Za-z0-9._-]+", repo):
+        sys.exit(f"{PROG}: expected <owner/repo>, got: {repo}")
+    if not re.fullmatch(r"[0-9]+", pr):
+        sys.exit(f"{PROG}: expected a numeric pull request number, got: {pr}")
+
+    project = os.environ.get("SANDBOX_PROJECT_FOLDER")
+    if not project:
+        sys.exit(f"{PROG}: SANDBOX_PROJECT_FOLDER is not set")
+    for tool in ("git", "gh"):
+        if shutil.which(tool) is None:
+            sys.exit(f"{PROG}: {tool} not found on PATH")
+
+    slug = repo.replace("/", "__", 1)
+    meta = Path(project) / "reviews" / f"{slug}__pr-{pr}" / "meta"
+    meta.mkdir(parents=True, exist_ok=True)
+
+    view = json.loads(sh("gh", "pr", "view", pr, "-R", repo, "--json", FIELDS))
+    (meta / "pr.json").write_text(json.dumps(view, indent=2) + "\n")
+    (meta / "pr.diff").write_text(sh("gh", "pr", "diff", pr, "-R", repo))
+
+    comments: list = []
+    page = 1
+    while True:  # page by hand: no dependence on gh's --slurp or --jq
+        url = f"repos/{repo}/pulls/{pr}/comments?per_page={PER_PAGE}&page={page}"
+        batch = json.loads(sh("gh", "api", url))
+        comments += batch
+        if len(batch) < PER_PAGE:
+            break
+        page += 1
+    (meta / "review-comments.json").write_text(json.dumps(comments, indent=2) + "\n")
+
+    cache = (
+        Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
+        / "sardine-repos"
+        / slug
+    )
+    if not (cache / ".git").is_dir():
+        shutil.rmtree(cache, ignore_errors=True)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        sh("gh", "repo", "clone", repo, str(cache), "--", "--quiet")
+
+    base = view["baseRefName"]
+    for refspec in (
+        f"pull/{pr}/head:refs/sardine/pr-{pr}",
+        f"+refs/heads/{base}:refs/sardine/base",
+    ):
+        git("fetch", "-q", "--no-tags", "-f", "origin", refspec, cwd=cache)
+
+    checkout = meta.parent / "repo"
+    if not (checkout / ".git").is_dir():
+        shutil.rmtree(checkout, ignore_errors=True)
+        sh("git", "clone", "-q", "--no-hardlinks", str(cache), str(checkout))
+        git("remote", "remove", "origin", cwd=checkout)
+        for ref in git(
+            "for-each-ref", "--format=%(refname)", "refs/remotes", cwd=checkout
+        ).split():
+            git("update-ref", "-d", ref, cwd=checkout)
+    else:
+        git("checkout", "-q", "-f", "--detach", cwd=checkout)
+
+    git(
+        "fetch",
+        "-q",
+        "--no-tags",
+        "-f",
+        str(cache),
+        f"+refs/sardine/pr-{pr}:refs/heads/pr-{pr}",
+        "+refs/sardine/base:refs/heads/_base",
+        cwd=checkout,
+    )
+    git("checkout", "-q", "-f", f"pr-{pr}", cwd=checkout)
+
+    (checkout.parent / "README.md").write_text(
+        readme(
+            view, repo, pr, git("rev-parse", "--short", "HEAD", cwd=checkout).strip()
+        )
+    )
+    print(checkout.parent)
+
+
+if __name__ == "__main__":
+    main()
