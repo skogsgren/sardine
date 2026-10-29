@@ -49,7 +49,7 @@ Set environment variables on host machine:
 
 Build and start the containers:
 
-    docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+    docker-compose -f compose.yaml -f compose.dev.yaml up -d --build
 
 Then enter the sandbox using docker exec:
 
