@@ -67,6 +67,13 @@ aliases to get you directly into a harness or tool:
                                          o:::::::;;///
                                         >::::::::;;\\\
                                           ''\\\\\'" ';\
+
+Also, if you think the docker notices are annoying once you
+leave the sandbox, set the following environment variable on
+the host:
+
+    export DOCKER_CLI_HINTS=false
+
 o----------------o
 |   PI HARNESS   |
 o----------------o
