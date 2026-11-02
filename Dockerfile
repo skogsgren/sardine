@@ -27,6 +27,7 @@ RUN apt-get update \
         python3-build \
         python3-wheel \
         sqlite3 \
+        shellcheck \
     && rm -rf /var/lib/apt/lists/*
 
 # python tooling
