@@ -25,7 +25,7 @@ While minimal, some things are included:
     - python3 (w. numpy, pandas, matplotlib)
     - python3 tooling (uv, poetry, ruff)
     - node, fnm
-    - git, jq, ripgrep, wget, sqlite3
+    - git, jq, ripgrep, wget, sqlite3, htop
     - pi, opencode
 
 o-----------------o
@@ -73,6 +73,10 @@ leave the sandbox, set the following environment variable on
 the host:
 
     export DOCKER_CLI_HINTS=false
+
+Lastly, if you're using colima: by default there's a 2Gb RAM
+limit, which can OOM if you run a lot of processes. Edit
+~/.colima/default/colima.yaml and adjust accordingly.
 
 o--------------------o
 |  PR REVIEW SCRIPT  |
