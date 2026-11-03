@@ -37,7 +37,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    pids_limit: 512
+    pids_limit: 4096
     tmpfs:
       - /tmp:size=2G,mode=1777,exec
 
