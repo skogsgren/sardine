@@ -18,20 +18,6 @@ FIELDS = (
     "createdAt,baseRefName,headRefName,files,comments,reviews"
 )
 
-README = """# {repo} #{pr} - review workspace
-
-1. `meta/pr.json` - title, body, description, PR comments, reviews, file list.
-2. `meta/pr.diff` - the change set.
-3. `meta/review-comments.json` - inline line-anchored review comments.
-4. `repo/` - checkout at the PR head, for surrounding context.
-
-`repo/pr-{pr}` is the PR head, `repo/_base` is the base branch tip:
-
-    git -C repo diff "$(git -C repo merge-base _base pr-{pr})" pr-{pr}
-
-`origin` is deliberately absent, so `fetch` and `push` fail here by design.
-"""
-
 
 def sh(*argv: str) -> str:
     proc = subprocess.run(
@@ -52,22 +38,20 @@ def readme(view: dict, repo: str, pr: str, sha: str) -> str:
 
 Head `{view["headRefName"]}` @ `{sha}` - base `{view["baseRefName"]}`
 
-Static snapshot written on the host by `scripts/sardine-pr`. No credential,
-no remote.
+Static snapshot written on the host by `scripts/sardine-pr`. No credential, no
+remote. Re-running the command updates this folder in place.
 
 1. `meta/pr.json` - the PR: title, body, comments, reviews, file list.
 2. `meta/pr.diff` - the change set.
 3. `meta/review-comments.json` - inline line-anchored review comments.
 4. `repo/` - checkout at the PR head, for surrounding context.
 
-The checkout is self-contained, with `pr-{pr}` as the PR head and `_base` as
-the base branch tip:
+The checkout is self-contained, `pr-{pr}` is the PR head, `_base` the base tip:
 
     git -C repo log --oneline -5 pr-{pr}
     git -C repo diff "$(git -C repo merge-base _base pr-{pr})" pr-{pr}
 
 `origin` is deliberately absent, so `fetch` and `push` fail here by design.
-Re-running the command updates this folder in place.
 """
 
 
@@ -83,9 +67,9 @@ def main() -> None:
     project = os.environ.get("SANDBOX_PROJECT_FOLDER")
     if not project:
         sys.exit(f"{PROG}: SANDBOX_PROJECT_FOLDER is not set")
-    for tool in ("git", "gh"):
-        if shutil.which(tool) is None:
-            sys.exit(f"{PROG}: {tool} not found on PATH")
+    missing = [t for t in ("git", "gh") if shutil.which(t) is None]
+    if missing:
+        sys.exit(f"{PROG}: not found on PATH: {', '.join(missing)}")
 
     slug = repo.replace("/", "__", 1)
     meta = Path(project) / "reviews" / f"{slug}__pr-{pr}" / "meta"
@@ -106,20 +90,16 @@ def main() -> None:
         page += 1
     (meta / "review-comments.json").write_text(json.dumps(comments, indent=2) + "\n")
 
-    cache = (
-        Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
-        / "sardine-repos"
-        / slug
-    )
+    cache_home = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
+    cache = cache_home / "sardine-repos" / slug
     if not (cache / ".git").is_dir():
         shutil.rmtree(cache, ignore_errors=True)
         cache.parent.mkdir(parents=True, exist_ok=True)
         sh("gh", "repo", "clone", repo, str(cache), "--", "--quiet")
 
-    base = view["baseRefName"]
     for refspec in (
         f"pull/{pr}/head:refs/sardine/pr-{pr}",
-        f"+refs/heads/{base}:refs/sardine/base",
+        f"+refs/heads/{view['baseRefName']}:refs/sardine/base",
     ):
         git("fetch", "-q", "--no-tags", "-f", "origin", refspec, cwd=cache)
 
@@ -128,9 +108,8 @@ def main() -> None:
         shutil.rmtree(checkout, ignore_errors=True)
         sh("git", "clone", "-q", "--no-hardlinks", str(cache), str(checkout))
         git("remote", "remove", "origin", cwd=checkout)
-        for ref in git(
-            "for-each-ref", "--format=%(refname)", "refs/remotes", cwd=checkout
-        ).split():
+        stale = git("for-each-ref", "--format=%(refname)", "refs/remotes", cwd=checkout)
+        for ref in stale.split():
             git("update-ref", "-d", ref, cwd=checkout)
     else:
         git("checkout", "-q", "-f", "--detach", cwd=checkout)
@@ -147,11 +126,8 @@ def main() -> None:
     )
     git("checkout", "-q", "-f", f"pr-{pr}", cwd=checkout)
 
-    (checkout.parent / "README.md").write_text(
-        readme(
-            view, repo, pr, git("rev-parse", "--short", "HEAD", cwd=checkout).strip()
-        )
-    )
+    sha = git("rev-parse", "--short", "HEAD", cwd=checkout).strip()
+    (checkout.parent / "README.md").write_text(readme(view, repo, pr, sha))
     print(checkout.parent)
 
 
