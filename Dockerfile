@@ -49,8 +49,6 @@ ENV FNM_DIR=/home/node/.local/share/fnm \
     UV_TOOL_BIN_DIR=/home/node/.local/bin \
     PATH=$PATH:/home/node/.local/bin:/home/node/.cargo/bin
 
-ENV LITELLM_API_KEY=placeholder-not-a-key
-
 RUN printf '%s\n' \
       'eval "$(fnm env --use-on-cd --shell bash)"' \
       'export PROMPT_COMMAND="PS1='\''\\$ '\''"' \

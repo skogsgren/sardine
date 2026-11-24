@@ -29,12 +29,14 @@ services:
         target: /home/node/.pi
         bind:
           create_host_path: false
-      - type: bind
-        source: ${HOME}/.config/opencode
-        target: /home/node/.config/opencode
-        bind:
-          create_host_path: false
       - sandbox-home:/home/node
+    environment:
+      SARDINE_LITELLM_ENABLED: ${SARDINE_LITELLM_ENABLED:-}
+      SARDINE_OPENAI_ENABLED: ${SARDINE_OPENAI_ENABLED:-}
+      SARDINE_OPENROUTER_ENABLED: ${SARDINE_OPENROUTER_ENABLED:-}
+      LITELLM_API_KEY: ${LITELLM_OPENAI_ENABLED:+placeholder}
+      OPENAI_API_KEY: ${SARDINE_OPENAI_ENABLED:+placeholder}
+      OPENROUTER_API_KEY: ${SARDINE_OPENROUTER_ENABLED:+placeholder}
     cap_drop:
       - ALL
     security_opt:

@@ -47,9 +47,9 @@ Set environment variables on host machine:
     GATEWAY_KEY (optional)
         The LiteLLM API key.
     OPENAI_API_KEY (optional)
-        The OpenAI API key.
+        The OpenAI API key, read by the gateway only.
     OPENROUTER_API_KEY (optional)
-        The OpenRouter API key.
+        The OpenRouter API key, read by the gateway only.
 
 Build and start the containers:
 

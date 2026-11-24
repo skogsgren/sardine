@@ -44,9 +44,12 @@ async function fetchLiteLLMModels() {
 
 export default async function (pi: ExtensionAPI) {
   const [hasLiteLLM, hasOpenAI, hasOpenRouter] = await Promise.all([
-    checkRoute("/litellm/model_group/info"),
-    checkRoute("/openai/v1/models"),
-    checkRoute("/openrouter/v1/auth/key"),
+    process.env.SARDINE_LITELLM_ENABLED === "1" &&
+      checkRoute("/litellm/model_group/info"),
+    process.env.SARDINE_OPENAI_ENABLED === "1" &&
+      checkRoute("/openai/v1/models"),
+    process.env.SARDINE_OPENROUTER_ENABLED === "1" &&
+      checkRoute("/openrouter/v1/auth/key"),
   ]);
 
   if (hasLiteLLM) {
