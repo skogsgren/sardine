@@ -44,14 +44,10 @@ RUN mkdir -p /home/node/.local/bin /home/node/.cache \
     && echo 'sandbox home volume' > /home/node/.keep \
     && chown -R node:node /home/node
 
-# install harnesses
-RUN curl -fsSL https://pi.dev/install.sh | sh
-RUN curl -fsSL https://opencode.ai/v2/install | bash
-
 ENV FNM_DIR=/home/node/.local/share/fnm \
     NPM_CONFIG_PREFIX=/home/node/.local \
     UV_TOOL_BIN_DIR=/home/node/.local/bin \
-    PATH=$PATH:/home/node/.local/bin:/home/node/.opencode/bin:/home/node/.cargo/bin
+    PATH=$PATH:/home/node/.local/bin:/home/node/.cargo/bin
 
 ENV LITELLM_API_KEY=placeholder-not-a-key
 
