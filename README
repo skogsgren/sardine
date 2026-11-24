@@ -14,7 +14,7 @@ extensible to the point of being dangerous if you want to.
 Who am I to say you can't shoot yourself in the foot?  I'm
 not your mother.
 
-It works in a LiteLLM setup, where the API key is injected
+It works in a setup where the API key is injected
 by an isolated Caddy gateway container. The sandbox image
 has a persistent docker volume for things like installing
 harnesses, caches etc. Just think of it as a small Linux
@@ -42,10 +42,14 @@ Set environment variables on host machine:
 
     SANDBOX_PROJECT_FOLDER
         The working directory the sandbox uses.
-    GATEWAY_URL
+    GATEWAY_URL (optional)
         The LiteLLM endpoint URL.
-    GATEWAY_KEY
+    GATEWAY_KEY (optional)
         The LiteLLM API key.
+    OPENAI_API_KEY (optional)
+        The OpenAI API key.
+    OPENROUTER_API_KEY (optional)
+        The OpenRouter API key.
 
 Build and start the containers:
 
@@ -113,25 +117,10 @@ o----------------o
 |   PI HARNESS   |
 o----------------o
 
-pi is installed by default. To enable dynamic model
-discovery and LiteLLM MCP registration:
+To enable dynamic model discovery and provider registration
+(LiteLLM, OpenAI, OpenRouter):
 
     mkdir -p ~/.pi/agent/extensions
-    cp harnesses/pi/litellm.ts ~/.pi/agent/extensions/
-
-o------------------o
-| OPENCODE HARNESS |
-o------------------o
-
-opencode is installed by default. To enable dynamic model
-discovery and LiteLLM MCP registration:
-
-    mkdir -p ~/.config/opencode
-    sh harnesses/opencode/litellm.sh
-
-To refresh on every launch, define an alias like this:
-
-    cp harnesses/opencode/litellm.sh ~/.config/opencode/litellm.sh
-    alias opencode='docker exec -it sardine sh -c "sh ~/.config/opencode/litellm.sh >/dev/null; exec opencode"'
+    cp harnesses/pi/dynamic_discovery.ts ~/.pi/agent/extensions/
 
 " vim: set autoindent tw=60 cc=60 formatoptions+=t:

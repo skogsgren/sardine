@@ -3,7 +3,7 @@
 
 	# Chat completions, embeddings, models
 	handle /litellm/v1/* {
-		reverse_proxy {$GATEWAY_URL} {
+		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
 			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
@@ -13,7 +13,7 @@
 
 	# Dynamic model discovery
 	handle /litellm/model_group/info {
-		reverse_proxy {$GATEWAY_URL} {
+		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
 			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
@@ -22,10 +22,30 @@
 
 	# MCP server
 	handle /litellm/mcp* {
-		reverse_proxy {$GATEWAY_URL} {
+		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
 			header_up x-litellm-api-key "Bearer {env.GATEWAY_KEY}"
+			flush_interval -1
+		}
+	}
+
+	# OpenAI
+	handle /openai/v1/* {
+		uri strip_prefix /openai
+		reverse_proxy https://api.openai.com {
+			header_up Host api.openai.com
+			header_up Authorization "Bearer {env.OPENAI_API_KEY}"
+			flush_interval -1
+		}
+	}
+
+	# OpenRouter
+	handle /openrouter/v1/* {
+		uri replace /openrouter/v1 /api/v1
+		reverse_proxy https://openrouter.ai {
+			header_up Host openrouter.ai
+			header_up Authorization "Bearer {env.OPENROUTER_API_KEY}"
 			flush_interval -1
 		}
 	}

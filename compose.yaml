@@ -1,7 +1,9 @@
 # configure through the environment or a .env file next to this one:
 #   SANDBOX_PROJECT_FOLDER  absolute path of the folder the agent may see
-#   GATEWAY_KEY             privileged key, read by the gateway service only
-#   GATEWAY_URL             gateway origin, scheme and host, no path
+#   GATEWAY_KEY             LiteLLM API key, read by gateway only (optional)
+#   GATEWAY_URL             LiteLLM origin URL, scheme and host, no path (optional)
+#   OPENAI_API_KEY          OpenAI API key, read by gateway only (optional)
+#   OPENROUTER_API_KEY      OpenRouter API key, read by gateway only (optional)
 #   SANDBOX_IMAGE           image reference (defaults to the local build tag)
 x-project: &project ${SANDBOX_PROJECT_FOLDER:?set SANDBOX_PROJECT_FOLDER to the folder the agent may see}
 
@@ -48,8 +50,10 @@ services:
     volumes:
       - ./gateway.Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
-      GATEWAY_KEY: ${GATEWAY_KEY:?export GATEWAY_KEY or put it in .env}
-      GATEWAY_URL: ${GATEWAY_URL:?export GATEWAY_URL or put it in .env}
+      GATEWAY_KEY: ${GATEWAY_KEY:-}
+      GATEWAY_URL: ${GATEWAY_URL:-http://127.0.0.1:4000}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
 
 volumes:
   sandbox-home:
