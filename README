@@ -50,6 +50,12 @@ Set environment variables on host machine:
         The OpenAI API key, read by the gateway only.
     OPENROUTER_API_KEY (optional)
         The OpenRouter API key, read by the gateway only.
+    SARDINE_LITELLM_ENABLED (optional)
+        Set to 1 to enable LiteLLM.
+    SARDINE_OPENAI_ENABLED (optional)
+        Set to 1 to enable OpenAI.
+    SARDINE_OPENROUTER_ENABLED (optional)
+        Set to 1 to enable OpenRouter.
 
 Build and start the containers:
 
@@ -122,5 +128,20 @@ To enable dynamic model discovery and provider registration
 
     mkdir -p ~/.pi/agent/extensions
     cp harnesses/pi/dynamic_discovery.ts ~/.pi/agent/extensions/
+
+o------------------o
+| OPENCODE HARNESS |
+o------------------o
+
+To enable model discovery and provider registration
+(LiteLLM, OpenAI, OpenRouter):
+
+    mkdir -p ~/.config/opencode
+    sh harnesses/opencode/litellm.sh
+
+To refresh on every launch, define an alias like this:
+
+    cp harnesses/opencode/litellm.sh ~/.config/opencode/litellm.sh
+    alias opencode='docker exec -it sardine sh -c "sh ~/.config/opencode/litellm.sh >/dev/null; exec opencode"'
 
 " vim: set autoindent tw=60 cc=60 formatoptions+=t:
