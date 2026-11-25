@@ -3,6 +3,7 @@
 
 	# Chat completions, embeddings, models
 	handle /litellm/v1/* {
+		uri strip_prefix /litellm
 		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
@@ -13,6 +14,7 @@
 
 	# Dynamic model discovery
 	handle /litellm/model_group/info {
+		uri strip_prefix /litellm
 		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
@@ -22,6 +24,7 @@
 
 	# MCP server
 	handle /litellm/mcp* {
+		uri strip_prefix /litellm
 		reverse_proxy {$GATEWAY_URL:http://127.0.0.1:4000} {
 			header_up Host {upstream_hostport}
 			header_up Authorization "Bearer {env.GATEWAY_KEY}"
