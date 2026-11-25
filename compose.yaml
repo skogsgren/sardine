@@ -4,6 +4,9 @@
 #   GATEWAY_URL             LiteLLM origin URL, scheme and host, no path (optional)
 #   OPENAI_API_KEY          OpenAI API key, read by gateway only (optional)
 #   OPENROUTER_API_KEY      OpenRouter API key, read by gateway only (optional)
+#   SARDINE_LITELLM_ENABLED 1 to enable LiteLLM provider in sandbox (optional)
+#   SARDINE_OPENAI_ENABLED  1 to enable OpenAI provider in sandbox (optional)
+#   SARDINE_OPENROUTER_ENABLED 1 to enable OpenRouter provider in sandbox (optional)
 #   SANDBOX_IMAGE           image reference (defaults to the local build tag)
 x-project: &project ${SANDBOX_PROJECT_FOLDER:?set SANDBOX_PROJECT_FOLDER to the folder the agent may see}
 
@@ -34,9 +37,6 @@ services:
       SARDINE_LITELLM_ENABLED: ${SARDINE_LITELLM_ENABLED:-}
       SARDINE_OPENAI_ENABLED: ${SARDINE_OPENAI_ENABLED:-}
       SARDINE_OPENROUTER_ENABLED: ${SARDINE_OPENROUTER_ENABLED:-}
-      LITELLM_API_KEY: ${LITELLM_OPENAI_ENABLED:+placeholder}
-      OPENAI_API_KEY: ${SARDINE_OPENAI_ENABLED:+placeholder}
-      OPENROUTER_API_KEY: ${SARDINE_OPENROUTER_ENABLED:+placeholder}
     cap_drop:
       - ALL
     security_opt:

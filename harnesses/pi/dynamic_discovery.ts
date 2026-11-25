@@ -53,6 +53,7 @@ export default async function (pi: ExtensionAPI) {
   ]);
 
   if (hasLiteLLM) {
+    process.env.LITELLM_API_KEY = "placeholder";
     const models = await fetchLiteLLMModels();
     pi.registerProvider("litellm", {
       name: "LiteLLM",
@@ -63,19 +64,30 @@ export default async function (pi: ExtensionAPI) {
       refreshModels: fetchLiteLLMModels,
     });
     pi.registerMcpServer("litellm", { url: `${GATEWAY}/litellm/mcp` });
+  } else {
+    delete process.env.LITELLM_API_KEY;
+    pi.unregisterProvider("litellm");
   }
 
   if (hasOpenAI) {
+    process.env.OPENAI_API_KEY = "placeholder";
     pi.registerProvider("openai", {
       baseUrl: `${GATEWAY}/openai/v1`,
       apiKey: "placeholder",
     });
+  } else {
+    delete process.env.OPENAI_API_KEY;
+    pi.unregisterProvider("openai");
   }
 
   if (hasOpenRouter) {
+    process.env.OPENROUTER_API_KEY = "placeholder";
     pi.registerProvider("openrouter", {
       baseUrl: `${GATEWAY}/openrouter/v1`,
       apiKey: "placeholder",
     });
+  } else {
+    delete process.env.OPENROUTER_API_KEY;
+    pi.unregisterProvider("openrouter");
   }
 }
