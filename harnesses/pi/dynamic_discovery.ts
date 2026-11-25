@@ -33,9 +33,6 @@ async function fetchLiteLLMModels() {
         cacheRead: 0,
         cacheWrite: 0,
       },
-      ...(g.model_group.toLowerCase().includes("deepseek") && {
-        compat: { thinkingFormat: "deepseek", supportsReasoningEffort: false },
-      }),
     }));
   } catch {
     return [];
